@@ -107,20 +107,23 @@ def nutritionFacts_analsis(statistics, foodInfo):
     result = {}
 
     for suburb in statistics:
-        healthStar, protein, fat, carbohydrate, calorie, sodium = 0, 0, 0, 0, 0, 0
+        healthStar, protein, fat, carbohydrate, calorie, sodium, weighterTotal = 0, 0, 0, 0, 0, 0, 0
         foodDistribution = statistics[suburb]
         print(foodDistribution)
         foodCount = sum(statistics[suburb].values())
         for foods in foodDistribution:
-            num = foodDistribution[foods]
             nutrition = foodInfo.get(foods)
-            healthStar += float(nutrition[0]) * num
+            isMain = nutrition[7]
+            weightedNum = foodDistribution[foods] if isMain == 0 else 4 * foodDistribution[foods]
+            num = foodDistribution[foods]
+            healthStar += 1 * float(nutrition[0]) * num if isMain == 0 else 4 * float(nutrition[0])
             protein += float(nutrition[2]) * num
             fat += float(nutrition[3]) * num
             carbohydrate += float(nutrition[4]) * num
             calorie += float(nutrition[5]) * num
             sodium += float(nutrition[6]) * num
-        healthStar = round(healthStar / foodCount, 2)
+            weighterTotal += weightedNum
+        healthStar = round(healthStar / weighterTotal, 2)
         protein = round(protein / foodCount, 2)
         fat = round(fat / foodCount, 2)
         carbohydrate = round(carbohydrate / foodCount, 2)
@@ -176,14 +179,14 @@ def preprocess_FoodInfo(foodInfo):
 
 
 def analysis():
-    calculateavgMelb()
+    # calculateavgMelb()
 
-    # foodInfo = preprocess_FoodInfo('FoodInfo.csv')
-    # #timePeriod = input("please choose a time period")
-    # statistics = suburb_statistics11()
-    # result = nutritionFacts_analsis(statistics,foodInfo)
-    # writeCSV(result)
-    # draw_pie_chart(statistics, timePeriod)
+    foodInfo = preprocess_FoodInfo('FoodInfo.csv')
+    # timePeriod = input("please choose a time period")
+    statistics = suburb_statistics11()
+    result = nutritionFacts_analsis(statistics, foodInfo)
+    writeCSV(result)
+    draw_pie_chart(statistics, timePeriod)
 
 
 if __name__ == '__main__':
