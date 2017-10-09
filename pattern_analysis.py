@@ -7,7 +7,7 @@ import csv
 import matplotlib.pyplot as plt
 import time
 
-client = MongoClient('localhost', 15986)
+client = MongoClient('localhost', 15985)
 db = client['food_analysis']
 filter_collection = db['pic_Info']
 suburbs = db['suburbs']
@@ -51,7 +51,7 @@ def get_suburb(location):
 def suburb_statistics11():
     statistics = {}
 
-    for item in filter_collection.find().limit(1000):
+    for item in filter_collection.find():
         classification = item['pic_pred']  # 以食物预测为分类依据
         location = item['pic_loc']  # 获取地点
         suburb = get_suburb(location)  # 获取地点所在area
@@ -140,13 +140,13 @@ def calculateavgMelb():
     result = {}
 
     csvreader = csv.reader(open('nutritionFacts.csv'))
+    firstLine = next(csvreader)
     for row in csvreader:
         key = row[0]
         result[key] = list(row[1:])
 
     for keys in result:
-        info = [float(element) for element in
-                result[keys][0].replace(',', ' ').replace('[', ' ').replace(']', ' ').split()]
+        info = [float(a) for a in result[keys]]
         healthStar += info[0] * info[6]
         protein += info[1] * info[6]
         fat += info[2] * info[6]
@@ -164,8 +164,10 @@ def calculateavgMelb():
 def writeCSV(dict):
     with open('nutritionFacts.csv', 'w+') as csv_file:
         writer = csv.writer(csv_file)
-        for key, value in dict.items():
-            writer.writerow([key, value])
+        writer.writerow(['SA2','HealthStar','Protein','Fat','Carb','Calorie','Sodium','Quantity'])
+        for key in dict.keys():
+            writer.writerow ([key]+ [i for i in dict[key]])
+
 
 
 def preprocess_FoodInfo(foodInfo):
@@ -179,13 +181,15 @@ def preprocess_FoodInfo(foodInfo):
 
 
 def analysis():
-    # calculateavgMelb()
 
     foodInfo = preprocess_FoodInfo('FoodInfo.csv')
     # timePeriod = input("please choose a time period")
     statistics = suburb_statistics11()
     result = nutritionFacts_analsis(statistics, foodInfo)
+    print (111)
     writeCSV(result)
+    print (222)
+    calculateavgMelb()
     draw_pie_chart(statistics, timePeriod)
 
 
